@@ -1,0 +1,21 @@
+
+# Playwright
+
+
+# Dependency directory
+node_modules/
+
+# Playwright execution artifacts & reports
+test-results/
+playwright-report/
+blob-report/
+playwright-html-report/
+playwright/.cache/
+playwright/.auth/
+
+# Allure Reports
+allure-results/
+allure-report/
+
+# Environment and sensitive data
+.env

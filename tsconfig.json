@@ -12,10 +12,17 @@
         "types": [
             "node",
             "@playwright/test"
-        ]
+        ],
+        "paths": {
+           "@utils/*": ["./utils/*"],      
+           "@components/*": ["./components/*"],
+           "@frameworkConfig/*": ["./frameworkConfig/*"],
+           "@pages/*": ["./pages/*"]
+        }
     },
     "include": [
-        "tests/**/*.ts",
+        "**/*.ts",
+        // "tests/**/*.ts",
         "playwright.config.ts",
         // "playwright.config.qa.ts",
         // "playwright.config.stage.ts",

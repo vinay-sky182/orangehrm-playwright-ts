@@ -18,4 +18,5 @@ allure-results/
 allure-report/
 
 # Environment and sensitive data
-.env
+.env.dev
+.env.qa

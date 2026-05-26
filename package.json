@@ -5,8 +5,6 @@
   "main": "index.js",
     "scripts": {
     "test": "npx playwright test",
-    "test:qa": "npx playwright test --config= playwright.config.qa.ts",
-    "test:stage": "npx playwright test --config= playwright.config.stage.ts",
     "allure:genrate": "npx allure generate allure-results --clean -o allure-report",
     "allure:open": "npx allure open allure-report"
   },
@@ -18,6 +16,7 @@
     "@playwright/test": "^1.60.0",
     "@types/dotenv": "^6.1.1",
     "@types/node": "^25.9.1",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^6.0.3"
   },
   "dependencies": {

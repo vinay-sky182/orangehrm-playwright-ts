@@ -1,7 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
 import path from "path";
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
+// 1. Terminal se ENV variable read karein (dev ya qa). Agar kuch nahi diya toh default 'dev' chalega
+const environment = process.env.ENV || 'dev';
+
+dotenv.config({ path: path.resolve(process.cwd(), `.env.${environment}`) });
 
 // process.cwd() returns the current working directory of the Node.js process, which is typically the root directory of your project. By using path.resolve(process.cwd(), ".env"), you are constructing an absolute path to the .env file located in the root directory of your project. This ensures that the dotenv package can correctly locate and load the environment variables defined in the .env file, regardless of where the script is executed from within the project structure.
 

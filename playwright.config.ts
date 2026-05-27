@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import path from "path";
 
 // 1. Terminal se ENV variable read karein (dev ya qa). Agar kuch nahi diya toh default 'dev' chalega
-const environment = process.env.ENV || 'dev';
+const environment = process.env.ENV || 'qa';
 
 dotenv.config({ path: path.resolve(process.cwd(), `.env.${environment}`) });
 

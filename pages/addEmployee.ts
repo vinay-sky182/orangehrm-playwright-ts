@@ -36,30 +36,60 @@ export class AddEmployee {
         // this.successMsg = page.getByText('Your Account Has Been Created!', { exact: true });
     }
 
-    async addEmployee(firstName: string, lastName: string, employeeId: string, username: string, status: string, password: string, middleName?: string) {
+    async addEmployee(firstName: string, lastName: string, employeeId: string, createLoginDetails: boolean, status: string, middleName?: string, username?: string, password?: string) {
         await this.eleutil.fill(this.firstNameInput, firstName);
 
         await this.eleutil.fill(this.lastNameInput, lastName);
 
         await this.eleutil.fill(this.employeeId, employeeId);
-
-        await this.eleutil.click(this.createLoginDetailsToggel, { force: true });
-
-        await this.eleutil.fill(this.usernameInput, username);
-
         if (middleName) {
             await this.eleutil.fill(this.middleNameInput, middleName);
         }
 
-        if (status === 'Enabled') {
-            await this.eleutil.click(this.statusEnabledRadio, { force: true });
+        // 2. TOGGLE CONDITIONAL LOGIC:
+        if (createLoginDetails) {
+            // If true, activate the toggle switch to reveal and populate the login credential fields
+            await this.eleutil.click(this.createLoginDetailsToggel, { force: true });
+
+            if (!username || !password) {
+                throw new Error("Error: Login credentials create karne ke liye Username aur Password dena zaroori hai!");
+            }
+
+            await this.eleutil.fill(this.usernameInput, username);
+            await this.eleutil.fill(this.passwordInput, password);
+            await this.eleutil.fill(this.confirmPasswordInput, password);
+
+            // Managing the account operational status (Enabled/Disabled) is part of the login details setup
+            if (status === 'Enabled') {
+                await this.eleutil.click(this.statusEnabledRadio, { force: true });
+            } else {
+                await this.eleutil.click(this.statusDisabledRadio, { force: true });
+            }
         } else {
-            await this.eleutil.click(this.statusDisabledRadio, { force: true });
+            // Skip conditional login creation sub-forms if portal access is not required
+            console.log(`Skipping login details creation for: ${firstName} ${lastName}`);
         }
 
-        await this.eleutil.fill(this.passwordInput, password);
-
-        await this.eleutil.fill(this.confirmPasswordInput, password);
+        // 3. Submit and save the employee profile form (Executes for both workflows)
         await this.eleutil.click(this.saveBtn);
+
+        /*         await this.eleutil.click(this.createLoginDetailsToggel, { force: true });
+        
+                await this.eleutil.fill(this.usernameInput, username);
+        
+                if (middleName) {
+                    await this.eleutil.fill(this.middleNameInput, middleName);
+                }
+        
+                if (status === 'Enabled') {
+                    await this.eleutil.click(this.statusEnabledRadio, { force: true });
+                } else {
+                    await this.eleutil.click(this.statusDisabledRadio, { force: true });
+                }
+        
+                await this.eleutil.fill(this.passwordInput, password);
+        
+                await this.eleutil.fill(this.confirmPasswordInput, password);
+                await this.eleutil.click(this.saveBtn); */
     }
 } 

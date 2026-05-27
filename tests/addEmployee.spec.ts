@@ -11,7 +11,7 @@ let addEmployeePage: AddEmployee;
 // Pre-requisite execution block before running each test case
 test.beforeEach(async ({ page }) => {
   // Log active environment credentials details on startup
-  Env.printEnvDetails();
+  // Env.printEnvDetails();
 
   // Initialize modular Page Object Model classes
   loginPage = new LoginPage(page);
@@ -20,7 +20,7 @@ test.beforeEach(async ({ page }) => {
 
   // Execute landing page navigation and login workflows
   await loginPage.goToLoginPage(Env.BASE_URL);
-  await loginPage.performLogin(Env.USERNAME, Env.PASSWORD);
+  await loginPage.performLogin(Env.VALID_USERNAME, Env.VALID_PASSWORD);
 
   // Assert and validate successful user redirection to the Dashboard screen
   await expect(loginPage.getDashboardTxt).toHaveText("Dashboard");

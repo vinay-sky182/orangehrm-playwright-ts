@@ -1,27 +1,38 @@
 name: Playwright Tests
 on:
   push:
-    branches: [ main, master ]
+    branches: [main]
   pull_request:
-    branches: [ main, master ]
+    branches: [main]
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      # 🧠 SMART JUGAD: GitHub text secrets ko physical files me covert karna
+      - name: Create .env files from GitHub Secrets
+        run: |
+          echo "${{ secrets.QA_ENV_FILE }}" > .env.qa
+          echo "${{ secrets.DEV_ENV_FILE }}" > .env.dev
+
+      # 🚀 RUN TESTS: Playwright khud local files (.env.qa ya .env.dev) ko read kar lega
+      - name: Run Playwright tests
+        env:
+          ENV: qa # 🎛️ Control toggle: Yahan 'qa' likhenge toh QA chalega, 'dev' likhenge toh DEV chalega
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

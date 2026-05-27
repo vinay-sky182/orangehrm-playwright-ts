@@ -8,30 +8,64 @@ let loginPage: LoginPage;
 let homePage: HomePage;
 let addEmployeePage: AddEmployee;
 
-// 1. Har test case se pehle yeh block chalega aur login complete karega
+// Pre-requisite execution block before running each test case
 test.beforeEach(async ({ page }) => {
-  // Env details ko print karne ke liye
+  // Log active environment credentials details on startup
   Env.printEnvDetails();
 
-  // Page objects initialize kiye
+  // Initialize modular Page Object Model classes
   loginPage = new LoginPage(page);
   homePage = new HomePage(page);
   addEmployeePage = new AddEmployee(page);
 
-  // Login process execution
+  // Execute landing page navigation and login workflows
   await loginPage.goToLoginPage(Env.BASE_URL);
   await loginPage.performLogin(Env.USERNAME, Env.PASSWORD);
 
-  // Verify karein ki login successful raha ya nahi
+  // Assert and validate successful user redirection to the Dashboard screen
   await expect(loginPage.getDashboardTxt).toHaveText("Dashboard");
 });
 
-test('test add employee functionality', async ({ page }) => {
+test('test add employee with login credentials setup', async () => {
+  // Navigate through structural component links from the HomePage object
+  await homePage.getLeftMenu.selectLeftMenuOption('PIM');
+  await homePage.getTopMenu.selectTopMenuOption('Add Employee');
+
+  // FIXED: Aligned parameters according to the updated dynamic signature:
+  // Sequence: firstName, lastName, employeeId, createLoginDetails (true), status, middleName, username, password
+  await addEmployeePage.addEmployee(
+    'Jhony',
+    'Walker',
+    '12345',
+    true,
+    'Enabled',
+    'M.',
+    'jhonywalker',
+    'jw@420'
+  );
+});
+
+test('test add employee without login credentials setup', async () => {
+  await homePage.getLeftMenu.selectLeftMenuOption('PIM');
+  await homePage.getTopMenu.selectTopMenuOption('Add Employee');
+
+  // createLoginDetails = false (Skips credentials and passes blank optional fields safely)
+  await addEmployeePage.addEmployee(
+    'Rohan',
+    'Sharma',
+    '67890',
+    false,
+    'Enabled',
+    'Kumar'
+  );
+});
+
+/* test('test add employee functionality', async ({ page }) => {
   await homePage.getLeftMenu.selectLeftMenuOption('PIM');
   await homePage.getTopMenu.selectTopMenuOption('Add Employee');
 
   await addEmployeePage.addEmployee('jhony', 'walker', '12345', 'jhonywalker', 'Enabled', 'jw@420');
-});
+}); */
 
 
 

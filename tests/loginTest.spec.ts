@@ -1,9 +1,15 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "../pages/LoginPage";
-import { Env } from "../frameworkConfig/env";
+import { LoginPage } from "@pages/loginPage";
+import { Env } from "@frameworkConfig/env";
+
+
+// Pre-requisite execution block before running each test case
+test.beforeEach(async ({ page }) => {
+  // Log active environment credentials details on startup
+  Env.printEnvDetails();
+});
 
 test("user login test", async ({ page }) => {
-
   let loginPage = new LoginPage(page);
   await loginPage.goToLoginPage(Env.BASE_URL);
   await loginPage.performLogin(Env.USERNAME, Env.PASSWORD);

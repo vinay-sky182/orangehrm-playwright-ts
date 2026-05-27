@@ -9,9 +9,9 @@ export class Env {
      * Agar loaded nahi hai, toh test ko pehle hi rok dega taaki galat execution na ho.
      */
     private static getEnvVariable(key: string): string {
-        const value = process.env[key];
+        const value = process.env[ key ];
         if (!value) {
-            throw new Error(`❌ Critical Error: Environment variable '${key}' is missing! Please check your .env file.`);
+            throw new Error(`Critical Error: Environment variable '${key}' is missing! Please check your .env file.`);
         }
         return value;
     }
@@ -19,10 +19,11 @@ export class Env {
     // 2. Ek clean method debug karne ke liye jise aap test ke shuru me call kar sakte hain
     public static printEnvDetails(): void {
         console.log("-----------------------------------------");
-        console.log(`🌍 ACTIVE ENVIRONMENT: ${process.env.ENV?.toUpperCase() || 'DEV (DEFAULT)'}`);
+        console.log(`🌍 ACTIVE ENVIRONMENT: ${process.env.ENV?.toUpperCase() || 'QA (DEFAULT)'}`);
         console.log(`🔗 BASE_URL: ${this.BASE_URL}`);
         console.log(`👤 USERNAME: ${this.USERNAME}`);
         console.log(`🔑 PASSWORD: ${this.PASSWORD ? '****** (Loaded)' : 'NOT LOADED'}`);
+        // console.log(`🔑 ACTUAL PASSWORD: ${this.PASSWORD}`);
         console.log("-----------------------------------------");
     }
 }

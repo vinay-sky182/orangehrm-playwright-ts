@@ -16,7 +16,7 @@ export class AddEmployee {
     private readonly passwordInput: Locator;
     private readonly confirmPasswordInput: Locator;
     private readonly saveBtn: Locator;
-    // private readonly successMsg: Locator;
+    private readonly toastMsg: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -33,7 +33,7 @@ export class AddEmployee {
         this.passwordInput = page.locator('.oxd-input-group').filter({ hasText: 'Password' }).locator('input').first();
         this.confirmPasswordInput = page.locator('.oxd-input-group').filter({ hasText: 'Confirm Password' }).locator('input').first();
         this.saveBtn = page.getByRole('button', { name: 'Save' });
-        // this.successMsg = page.getByText('Your Account Has Been Created!', { exact: true });
+        this.toastMsg = page.getByText('Successfully Saved', { exact: true });
     }
 
     async addEmployee(firstName: string, lastName: string, employeeId: string, createLoginDetails: boolean, status: string, middleName?: string, username?: string, password?: string) {
@@ -91,5 +91,10 @@ export class AddEmployee {
         
                 await this.eleutil.fill(this.confirmPasswordInput, password);
                 await this.eleutil.click(this.saveBtn); */
+    }
+
+    public get getToastMsg() {
+        // Toast message element ko directly return karna, jise test cases me assert ke liye use kiya ja sake
+        return this.toastMsg;
     }
 } 

@@ -1,5 +1,5 @@
 import { Page, Locator } from "@playwright/test";
-import { ElementUtil } from '../utils/elementUtil'
+import { ElementUtil } from "@utils/elementUtil";
 
 export class LoginPage {
 
@@ -10,6 +10,7 @@ export class LoginPage {
     private readonly loginBtn: Locator;
     private readonly warningMsg: Locator;
     private readonly frgtPasswrdLink: Locator;
+    private readonly dashboardTxt: Locator;
 
     // Initialize page elements here
     constructor(page: Page) {
@@ -20,6 +21,7 @@ export class LoginPage {
         this.loginBtn = this.page.getByRole("button", { name: "Login" });
         this.warningMsg = this.page.getByText('Invalid credentials')
         this.frgtPasswrdLink = this.page.getByText('Forgot your password?')
+        this.dashboardTxt = this.page.getByRole("heading", { name: "Dashboard" });
     }
 
     // async goToLoginPage(baseURL: string | undefined) {
@@ -47,8 +49,8 @@ export class LoginPage {
         // return pageTitle;
     }
 
-    get getDashboardTxt() {
-        return this.page.getByRole("heading", { name: "Dashboard" });
+    public get getDashboardTxt() {
+        return this.dashboardTxt;
     }
 
     // async getInvalidLoginMessage(): Promise<string | null> {

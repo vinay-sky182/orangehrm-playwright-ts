@@ -94,10 +94,29 @@ export class ElementUtil {
      * @param locator - Input web element identifier.
      * @param text - Plain text sequence to feed into the field.
      * @param index - Optional position index tracking target item.
+     * @param isSecret - Optional boolean flag to explicitly force credential masking (Prevents leaks).
      */
-    async fill(locator: flexibleLocator, text: string, index?: number): Promise<void> {
-        await this.getLocator(locator, index).fill(text, { timeout: this.defaultTimeOut });
-        console.log(`Filled text: ${text} into element: ${locator}`);
+    async fill(locator: flexibleLocator, text: string, isSecret?: boolean, index?: number,): Promise<void> {
+        const resolvedLocator = this.getLocator(locator, index);
+        await resolvedLocator.fill(text, { timeout: this.defaultTimeOut });
+
+        // 1. Automatic Check A: Browser HTML Attribute
+        const inputType = await resolvedLocator.getAttribute('type').catch(() => null);
+
+        // 2. Automatic Check B: Locator Text Inspection
+        const locatorString = locator.toString().toLowerCase();
+
+        // 3. Combined Logic: Evaluate if any automated security rules match or if a manual override is forced
+        const isPasswordField =
+            isSecret === true ||
+            inputType === 'password' ||
+            locatorString.includes('password');
+
+        // Determine terminal display text based on privacy validation rules
+        const logText = isPasswordField ? '********' : text;
+        console.log(`Filled text: ${logText} into element: ${locator}`);
+        // await this.getLocator(locator, index).fill(text, { timeout: this.defaultTimeOut });
+        // console.log(`Filled text: ${text} into element: ${locator}`);
     }
 
     /**

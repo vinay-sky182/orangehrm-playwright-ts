@@ -1,3 +1,4 @@
+import { Env } from "@frameworkConfig/env";
 import { Page, Locator } from "@playwright/test";
 import { ElementUtil } from "@utils/elementUtil";
 
@@ -11,6 +12,7 @@ export class LoginPage {
     private readonly warningMsg: Locator;
     private readonly frgtPasswrdLink: Locator;
     private readonly dashboardTxt: Locator;
+    private readonly errorTxt: Locator;
 
     // Initialize page elements here
     constructor(page: Page) {
@@ -22,6 +24,7 @@ export class LoginPage {
         this.warningMsg = this.page.getByText('Invalid credentials')
         this.frgtPasswrdLink = this.page.getByText('Forgot your password?')
         this.dashboardTxt = this.page.getByRole("heading", { name: "Dashboard" });
+        this.errorTxt = this.page.getByText('Invalid credentials', { exact: true });
     }
 
     // async goToLoginPage(baseURL: string | undefined) {
@@ -39,6 +42,15 @@ export class LoginPage {
                 await this.password.fill(password);
                 await this.loginBtn.click(); */
 
+        const isUserNameValid = user_name === Env.VALID_USERNAME;
+
+        console.log("-----------------------------------------");
+        console.log(`🌍 ACTIVE ENVIRONMENT: ${process.env.ENV?.toUpperCase() || 'QA (DEFAULT)'}`);
+        console.log(`🔗 BASE_URL: ${Env.BASE_URL}`);
+        console.log(`👤 INPUT USERNAME: ${user_name} ${isUserNameValid ? '(Valid)' : '(Invalid)'}`);
+        console.log(`🔑 INPUT PASSWORD: ${pass_word ? '******' : 'EMPTY'}`);
+        console.log("-----------------------------------------");
+
         // using utility methods
         await this.eleutil.fill(this.username, user_name);
         await this.eleutil.fill(this.password, pass_word);
@@ -51,6 +63,10 @@ export class LoginPage {
 
     public get getDashboardTxt() {
         return this.dashboardTxt;
+    }
+
+    public get getErrorTxt() {
+        return this.errorTxt;
     }
 
     // async getInvalidLoginMessage(): Promise<string | null> {

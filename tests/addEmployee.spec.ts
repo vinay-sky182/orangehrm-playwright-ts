@@ -36,13 +36,16 @@ test('test add employee with login credentials setup', async () => {
   await addEmployeePage.addEmployee(
     'Jhony',
     'Walker',
-    '12345',
+    'J@12345',
     true,
     'Enabled',
     'M.',
     'jhonywalker',
-    'jw@420'
+    'jw@0420'
   );
+
+  await expect.soft(addEmployeePage.getToastMsg).toBeVisible();
+  await expect.soft(addEmployeePage.getToastMsg).toHaveText("Successfully Saved");
 });
 
 test('test add employee without login credentials setup', async () => {
@@ -53,11 +56,13 @@ test('test add employee without login credentials setup', async () => {
   await addEmployeePage.addEmployee(
     'Rohan',
     'Sharma',
-    '67890',
+    '67893',
     false,
     'Enabled',
     'Kumar'
   );
+  await expect.soft(addEmployeePage.getToastMsg).toBeVisible();
+  await expect.soft(addEmployeePage.getToastMsg).toHaveText("Successfully Saved");
 });
 
 /* test('test add employee functionality', async ({ page }) => {
@@ -66,8 +71,6 @@ test('test add employee without login credentials setup', async () => {
 
   await addEmployeePage.addEmployee('jhony', 'walker', '12345', 'jhonywalker', 'Enabled', 'jw@420');
 }); */
-
-
 
 // await page.locator("(//div[@class='orangehrm-employee-form']//input[@class='oxd-input oxd-input--active'])[position()=1]");
 // await page.locator('.oxd-switch-input').click();

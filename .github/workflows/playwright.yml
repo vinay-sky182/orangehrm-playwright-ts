@@ -1,4 +1,4 @@
-name: Playwright & Reports
+name: playwright & reports
 
 on:
   push:
@@ -17,9 +17,15 @@ on:
           - qa
           - dev
       browser:
-        description: "Enter Browser Name (e.g., Google Chrome, Microsoft Edge, Firefox, Safari)"
+        description: 'Select Target Browser'
         required: true
-        default: "Google Chrome"
+        default: 'Google Chrome'
+        type: choice
+        options:
+          - 'Google Chrome'
+          - 'Microsoft Edge'
+          - 'Firefox'
+          - 'Safari'
 
 jobs:
   test:

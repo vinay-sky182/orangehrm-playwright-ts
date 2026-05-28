@@ -5,7 +5,7 @@ export class Env {
     public static readonly VALID_PASSWORD: string = Env.getEnvVariable('TEST_VALID_PASSWORD');
     public static readonly INVALID_USERNAME: string = Env.getEnvVariable('TEST_INVALID_USERNAME');
     public static readonly INVALID_PASSWORD: string = Env.getEnvVariable('TEST_INVALID_PASSWORD');
-    public static readonly BROWSER_ENV: string = Env.getEnvVariable('BROWSER_ENV');
+    // public static readonly BROWSER_ENV: string = Env.getEnvVariable('BROWSER_ENV');
     /**
      * Ek helper method jo check karega ki variable loaded hai ya nahi.
      * Agar loaded nahi hai, toh test ko pehle hi rok dega taaki galat execution na ho.

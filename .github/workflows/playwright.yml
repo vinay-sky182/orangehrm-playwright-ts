@@ -16,6 +16,10 @@ on:
         options:
           - qa
           - dev
+      browser:
+        description: "Enter Browser Name (e.g., Google Chrome, Microsoft Edge, Firefox, Safari)"
+        required: true
+        default: "Google Chrome"
 
 jobs:
   test:
@@ -57,7 +61,7 @@ jobs:
           # Ensure Playwright browsers are installed (safe to run again)
           npx playwright install chromium chrome msedge firefox webkit --with-deps
           # Run tests in headed mode on a virtual display
-          xvfb-run -s "-screen 0 1920x1080x24" npx playwright test tests/loginTest.spec.ts --config=playwright.config.ts --headed
+          xvfb-run -s "-screen 0 1920x1080x24" npx playwright test tests/loginTest.spec.ts --config=playwright.config.ts --project="${{ github.event.inputs.browser || 'Google Chrome' }}" --headed
 
       # 6️⃣ Generate Allure HTML Report
       - name: Generate Allure Report

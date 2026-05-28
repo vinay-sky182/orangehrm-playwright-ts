@@ -3,18 +3,44 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "//suite-1": "Runs full suite on default environment",
+"scripts": {
+    "//suite-1": "Runs full suite on default environment (QA) in headless mode if headless is set to true in config files",
     "test": "npx playwright test",
-    "//suite-qa": "Runs full suite on QA environment",
+
+    "//suite-qa": "Runs all tests on the QA environment using config files",
     "test:qa": "cross-env ENV=qa npx playwright test",
-    "//suite-dev": "Runs full suite on DEV environment",
+
+    "//suite-dev": "Runs all tests on the DEV environment using config files",
     "test:dev": "cross-env ENV=dev npx playwright test",
-    "//single-file-tip": "To run a single file use: npm run test:qa -- tests/loginTest.spec.ts",
-    "//single-test-tip": "To run a specific test by name use: npm run test:qa -- -g 'test name'",
-    "allure:genrate": "npx allure generate allure-results --clean -o allure-report",
-    "allure:open": "npx allure open allure-report"
+
+    "//single-file-tip": "Shortcut tip to execute a single test file on QA environment",
+    "//single-file-example": "Usage: npm run test:qa -- tests/loginTest.spec.ts",
+    
+    "//single-test-tip": "Shortcut tip to execute a specific test case by its name/title on QA",
+    "//single-test-example": "Usage: npm run test:qa -- -g 'user login with valid credentials'",
+
+    "//allure-report-generation": "Generates a fresh Allure HTML report by consuming raw XML/JSON results",
+    "allure:generate": "npx allure generate allure-results --clean -o allure-report",
+
+    "//allure-report-open": "Hosts and opens the generated Allure HTML report on a local live server",
+    "allure:open": "npx allure open allure-report",
+
+    "//browser-specific-chrome": "Runs full test suite on QA environment specifically inside headed Google Chrome browser",
+    "test:chrome": "cross-env ENV=qa npx playwright test --project=\"Google Chrome\" --headed",
+
+    "//browser-specific-edge": "Runs full test suite on QA environment specifically inside headed Microsoft Edge browser",
+    "test:edge": "cross-env ENV=qa npx playwright test --project=\"Microsoft Edge\"",
+
+    "//browser-specific-firefox": "Runs full test suite on QA environment specifically inside headed Mozilla Firefox browser",
+    "test:firefox": "cross-env ENV=qa npx playwright test --project=\"Firefox\" --headed",
+
+    "//cross-browser-multi": "Runs full test suite on QA environment across multiple browsers (Chrome & Edge) parallelly",
+    "test:multi": "cross-env ENV=qa npx playwright test --project=\"Google Chrome\" --project=\"Microsoft Edge\" --headed",
+
+    "//browser-specific-edge-headless": "Runs full test suite on QA environment inside Microsoft Edge in headless mode (background) by overriding config settings",
+    "test:edge:headless": "cross-env ENV=qa PLAYWRIGHT_HEADLESS=true npx playwright test --project=\"Microsoft Edge\""
   },
+  
   "keywords": [],
   "author": "",
   "license": "ISC",

@@ -9,6 +9,9 @@ dotenv.config({ path: path.resolve(process.cwd(), `.env.${environment}`) });
 
 // process.cwd() returns the current working directory of the Node.js process, which is typically the root directory of your project. By using path.resolve(process.cwd(), ".env"), you are constructing an absolute path to the .env file located in the root directory of your project. This ensures that the dotenv package can correctly locate and load the environment variables defined in the .env file, regardless of where the script is executed from within the project structure.
 
+// 3️⃣ Loading ke baad .env file se BROWSER_ENV ka naam nikalna aur use lowercase karna
+const currentBrowser = (process.env.BROWSER_ENV || 'chrome').toLowerCase().trim();
+
 // 2. SMART BROWSER MAPPING LOGIC
 const getDynamicProjects = () => {
   // .env file se browser names read karein, agar khali ho toh default 'chrome' rakhein
@@ -17,32 +20,36 @@ const getDynamicProjects = () => {
 
   const projectArray: ReturnType<typeof defineConfig>[ 'projects' ] = [];
 
-  // Agar file me 'chrome' likha hai
-  if (selectedBrowsers.includes('chrome')) {
+  // 🟢 FIXED LINE: Agar pipeline ya terminal se explicitly '--project' manga gaya hai,
+  // toh filter bypass karo aur saare browsers ko array me push hone do.
+  const bypassFilter = process.argv.join(' ').includes('--project');
+
+  // Agar file me 'chrome' likha hai ya pipeline se chal raha hai
+  if (bypassFilter || selectedBrowsers.includes('chrome')) {
     projectArray.push({
       name: 'Google Chrome',
-      use: { ...devices[ 'Desktop Chrome' ] },
+      use: { ...devices[ 'Desktop Chrome' ], channel: "chrome" },
     });
   }
 
-  // Agar file me 'msedge' likha hai
-  if (selectedBrowsers.includes('msedge') || selectedBrowsers.includes('edge')) {
+  // Agar file me 'msedge' likha hai ya pipeline se chal raha hai
+  if (bypassFilter || selectedBrowsers.includes('msedge') || selectedBrowsers.includes('edge')) {
     projectArray.push({
       name: 'Microsoft Edge',
       use: { ...devices[ 'Desktop Edge' ], channel: 'msedge' },
     });
   }
 
-  // Agar file me 'firefox' likha hai
-  if (selectedBrowsers.includes('firefox')) {
+  // Agar file me 'firefox' likha hai ya pipeline se chal raha hai
+  if (bypassFilter || selectedBrowsers.includes('firefox')) {
     projectArray.push({
       name: 'Firefox',
       use: { ...devices[ 'Desktop Firefox' ] },
     });
   }
 
-  // Agar file me 'safari' ya 'webkit' likha hai
-  if (selectedBrowsers.includes('safari') || selectedBrowsers.includes('webkit')) {
+  // Agar file me 'safari' ya 'webkit' likha hai ya pipeline se chal raha hai
+  if (bypassFilter || selectedBrowsers.includes('safari') || selectedBrowsers.includes('webkit')) {
     projectArray.push({
       name: 'Safari',
       use: { ...devices[ 'Desktop Safari' ] },

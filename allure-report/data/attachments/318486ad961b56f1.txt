@@ -1,0 +1,9 @@
+-----------------------------------------
+🌍 ACTIVE ENVIRONMENT: QA
+🔗 BASE_URL: https://opensource-demo.orangehrmlive.com/web/index.php/
+👤 INPUT USERNAME: Admin (Valid)
+🔑 INPUT PASSWORD: ******
+-----------------------------------------
+Filled text: Admin into element: getByRole('textbox', { name: 'Username' })
+Filled text: ******** into element: getByRole('textbox', { name: 'Password' })
+Clicked on element: getByRole('button', { name: 'Login' })

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QA Automation Dashboard - OrangeHRM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --panel-bg: rgba(30, 41, 59, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --color-qa: #f59e0b;
+      --color-dev: #10b981;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container { width: 100%; max-width: 850px; }
+    header { text-align: center; margin-bottom: 40px; }
+    header h1 {
+      font-size: 2.5rem; font-weight: 700; margin: 0 0 10px 0;
+      background: linear-gradient(to right, #38bdf8, #818cf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -0.05em;
+    }
+
+    .timestamp { color: var(--text-muted); font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .meta-card {
+      background: var(--panel-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 24px; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .meta-item { display: flex; align-items: center; gap: 16px; }
+    .meta-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(56, 189, 248, 0.1); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+    .meta-content label { display: block; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .meta-content span { font-size: 1.15rem; font-weight: 600; }
+    
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; display: inline-block; }
+    .env-qa { background: rgba(245, 158, 11, 0.2); color: var(--color-qa); border: 1px solid rgba(245, 158, 11, 0.4); }
+    .env-dev { background: rgba(16, 185, 129, 0.2); color: var(--color-dev); border: 1px solid rgba(16, 185, 129, 0.4); }
+
+    .report-card { background: var(--panel-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
+    .report-card h3 { margin: 0 0 25px 0; font-size: 1.4rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+    .report-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+
+    @media (max-width: 600px) {
+      .report-actions { grid-template-columns: 1fr; }
+      .meta-card { grid-template-columns: 1fr; }
+    }
+
+    .btn-report { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255, 255, 255, 0.05); text-align: center; gap: 12px; }
+    .btn-report i { font-size: 1.8rem; }
+    
+    .btn-pw { background: linear-gradient(135deg, #451a03 0%, #78350f 100%); color: #fde047; }
+    .btn-pw:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(234, 179, 8, 0.3); filter: brightness(1.2); }
+    .btn-html-rep { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #818cf8; }
+    .btn-html-rep:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.3); filter: brightness(1.2); }
+    .btn-allure-rep { background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); color: #34d399; }
+    .btn-allure-rep:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(52, 211, 153, 0.3); filter: brightness(1.2); }
+    footer { margin-top: auto; padding-top: 40px; color: var(--text-muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎭 Playwright Automation Portal</h1>
+      <div class="timestamp"><i class="fa-regular fa-clock"></i> Last Execution: <span id="live-date">Loading...</span></div>
+    </header>
+
+    <div class="meta-card">
+      <div class="meta-item">
+        <div class="meta-icon"><i class="fa-solid fa-server"></i></div>
+        <div class="meta-content">
+          <label>Target Environment</label>
+          <span id="live-env" class="badge">LOADING...</span>
+        </div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-icon"><i class="fa-solid fa-globe"></i></div>
+        <div class="meta-content">
+          <label>Execution Browser</label>
+          <span id="live-browser">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="report-card">
+      <h3><i class="fa-solid fa-square-poll-vertical"></i> Test Artifacts & Analytical Logs</h3>
+      <div class="report-actions">
+        <a href="./dev/playwright-report/index.html" class="btn-report btn-pw">
+          <i class="fa-solid fa-mask"></i><span>Playwright Core</span>
+        </a>
+        <a href="./dev/playwright-html-report/index.html" class="btn-report btn-html-rep">
+          <i class="fa-solid fa-code"></i><span>HTML Reporter</span>
+        </a>
+        <a href="./dev/allure-report/index.html" class="btn-report btn-allure-rep">
+          <i class="fa-solid fa-chart-line"></i><span>Allure Insights</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <footer>Powered by Playwright Framework & GitHub Pages</footer>
+
+  <script>
+    const pipelineEnv = "dev";
+    const pipelineBrowser = "Google Chrome";
+
+    const finalEnv = pipelineEnv.startsWith("__") ? "qa" : pipelineEnv;
+    const finalBrowser = pipelineBrowser.startsWith("__") ? "Google Chrome" : pipelineBrowser;
+
+    // Exact Indian Standard Time Clock Logic
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Kolkata', hour12: false };
+    const formattedDate = new Date().toLocaleString('en-IN', options) + ' IST';
+
+    document.getElementById("live-date").textContent = formattedDate;
+    document.getElementById("live-browser").textContent = finalBrowser;
+
+    const envBadge = document.getElementById("live-env");
+    envBadge.textContent = finalEnv.toUpperCase();
+    envBadge.classList.add("env-" + finalEnv.toLowerCase());
+  </script>
+</body>
+</html>

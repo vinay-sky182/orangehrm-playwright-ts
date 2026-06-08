@@ -102,7 +102,7 @@ export default defineConfig({
     navigationTimeout: 15000,
     actionTimeout: 10000,
     trace: "on-first-retry",
-    headless: false,
+    headless: !!process.env.CI,
     screenshot: "on",
     video: "on",
     baseURL: process.env.BASE_URL,

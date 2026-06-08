@@ -1,0 +1,378 @@
+# ============================================
+# 🎭 PLAYWRIGHT MANUAL SELECTION PIPELINE
+# ============================================
+# Select: Environment (dev/qa)
+# Select: Browser (matches your project names)
+# Trigger: Manual only (workflow_dispatch)
+# ✅ Playwright browsers cached
+# ✅ Reports published to GitHub Pages
+# ============================================
+
+# ============================================
+
+name: Playwright Manual Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select Target Environment"
+        required: true
+        default: "qa"
+        type: choice
+        options:
+          - dev
+          - qa
+
+      browser:
+        description: "Select Execution Browser"
+        required: true
+        default: "Google Chrome"
+        type: choice
+        options:
+          - "Google Chrome"
+          - "Microsoft Edge"
+          - "Firefox"
+          - "Safari"
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  test:
+    name: 🧪 Run Specs (${{ github.event.inputs.environment }} | ${{ github.event.inputs.browser }})
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js with caching
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      # 3️⃣ Install node dependencies
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      # 4️⃣ 🗄️ Cache Playwright Browsers to save pipeline time
+      - name: 🗄️ Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      # 5️⃣ Install browsers only if cache miss occurs
+      - name: 🎭 Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
+
+      - name: 🎭 Install Playwright dependencies (if cached)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+
+      # 6️⃣ Clean old test results
+      - name: 🧹 Clean previous results
+        run: |
+          rm -rf allure-results playwright-report playwright-html-report test-results
+
+      # 7️⃣ 🧠 SMART JUGAD: Create physical .env files from GitHub Text Secrets
+      - name: 🔑 Create .env files from GitHub Secrets
+        run: |
+          echo "${{ secrets.QA_ENV_FILE }}" > .env.qa
+          echo "${{ secrets.DEV_ENV_FILE }}" > .env.dev
+
+      # 8️⃣ Run Playwright Tests (Clean Headless Overrides)
+      - name: 🧪 Run Tests
+        run: |
+          npx playwright test \
+            --config=playwright.config.ts \
+            --project="${{ github.event.inputs.browser }}"
+        env:
+          CI: true
+          PLAYWRIGHT_HEADLESS: "true"
+          # 🟢 ENV variable pass kiya taaki dotenv.config sahi file pick kare
+          ENV: ${{ github.event.inputs.environment }}
+
+      # 9️⃣ Upload Core Playwright HTML Report
+      - name: 📊 Upload Playwright Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.event.inputs.environment }}
+          path: playwright-report/
+          retention-days: 30
+
+      # 🔟 Upload Custom HTML Reporter Logs
+      - name: 📊 Upload Custom HTML Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-html-report-${{ github.event.inputs.environment }}
+          path: playwright-html-report/
+          retention-days: 30
+
+      # 1️⃣1️⃣ Upload Raw Allure Results JSON/XML Data
+      - name: 📊 Upload Allure Results Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results-${{ github.event.inputs.environment }}
+          path: allure-results/
+          retention-days: 30
+
+      # 1️⃣2️⃣ Upload Screenshots/Videos on Test failure
+      - name: 📸 Upload Failure Screen-logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results-${{ github.event.inputs.environment }}
+          path: test-results/
+          retention-days: 7
+
+  publish-reports:
+    name: 📈 Compile and Publish Reports Portal
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 🟢 Directory paths synced perfectly with 'gh-pages-deploy' root folder
+      - name: 📥 Download Playwright Report
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report-${{ github.event.inputs.environment }}
+          path: gh-pages-deploy/${{ github.event.inputs.environment }}/playwright-report
+        continue-on-error: true
+
+      - name: 📥 Download HTML Report
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-html-report-${{ github.event.inputs.environment }}
+          path: gh-pages-deploy/${{ github.event.inputs.environment }}/playwright-html-report
+        continue-on-error: true
+
+      - name: 📥 Download Allure Results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-${{ github.event.inputs.environment }}
+          path: allure-results/${{ github.event.inputs.environment }}
+        continue-on-error: true
+
+      # ========== Generate Allure HTML Dashboard ==========
+      - name: 📦 Setup Java (Required for Allure engine)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: 📊 Install Allure CLI Utility
+        run: |
+          curl -o allure-2.24.0.tgz -Ls https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.24.0/allure-commandline-2.24.0.tgz
+          tar -zxvf allure-2.24.0.tgz
+          echo "ALLURE_PATH=$PWD/allure-2.24.0/bin/allure" >> $GITHUB_ENV
+
+      - name: 📊 Generate Allure HTML Report
+        run: |
+          ENV="${{ github.event.inputs.environment }}"
+          if [ -d "allure-results/$ENV" ] && [ "$(ls -A allure-results/$ENV 2>/dev/null)" ]; then
+            $ALLURE_PATH generate allure-results/$ENV -o gh-pages-deploy/$ENV/allure-report --clean
+            echo "✅ $ENV Allure report successfully compiled into deployment folder."
+          else
+            echo "⚠️ No $ENV allure results data logs found."
+          fi
+
+      # ========== 📝 Create Premium Index Dashboard ==========
+      - name: 📝 Generate Modern Index Dashboard Page
+        run: |
+          ENV="${{ github.event.inputs.environment || 'qa' }}"
+          BROWSER="${{ github.event.inputs.browser || 'Google Chrome' }}"
+
+          mkdir -p gh-pages-deploy
+
+          cat << 'EOF' > gh-pages-deploy/index.html
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>QA Automation Dashboard - OrangeHRM</title>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            
+            <style>
+              :root {
+                --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                --panel-bg: rgba(30, 41, 59, 0.7);
+                --border-color: rgba(255, 255, 255, 0.08);
+                --text-main: #f8fafc;
+                --text-muted: #94a3b8;
+                --color-qa: #f59e0b;
+                --color-dev: #10b981;
+              }
+
+              body {
+                font-family: 'Inter', sans-serif;
+                background: var(--bg-gradient);
+                color: var(--text-main);
+                min-height: 100vh;
+                margin: 0;
+                padding: 40px 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+              }
+
+              .container { width: 100%; max-width: 850px; }
+              header { text-align: center; margin-bottom: 40px; }
+              header h1 {
+                font-size: 2.5rem; font-weight: 700; margin: 0 0 10px 0;
+                background: linear-gradient(to right, #38bdf8, #818cf8);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                letter-spacing: -0.05em;
+              }
+
+              .timestamp { color: var(--text-muted); font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+              .meta-card {
+                background: var(--panel-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color);
+                border-radius: 16px; padding: 24px; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+              }
+
+              .meta-item { display: flex; align-items: center; gap: 16px; }
+              .meta-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(56, 189, 248, 0.1); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+              .meta-content label { display: block; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+              .meta-content span { font-size: 1.15rem; font-weight: 600; }
+              
+              .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; display: inline-block; }
+              .env-qa { background: rgba(245, 158, 11, 0.2); color: var(--color-qa); border: 1px solid rgba(245, 158, 11, 0.4); }
+              .env-dev { background: rgba(16, 185, 129, 0.2); color: var(--color-dev); border: 1px solid rgba(16, 185, 129, 0.4); }
+
+              .report-card { background: var(--panel-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
+              .report-card h3 { margin: 0 0 25px 0; font-size: 1.4rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+              .report-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+
+              @media (max-width: 600px) {
+                .report-actions { grid-template-columns: 1fr; }
+                .meta-card { grid-template-columns: 1fr; }
+              }
+
+              .btn-report { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255, 255, 255, 0.05); text-align: center; gap: 12px; }
+              .btn-report i { font-size: 1.8rem; }
+              
+              .btn-pw { background: linear-gradient(135deg, #451a03 0%, #78350f 100%); color: #fde047; }
+              .btn-pw:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(234, 179, 8, 0.3); filter: brightness(1.2); }
+              .btn-html-rep { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #818cf8; }
+              .btn-html-rep:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.3); filter: brightness(1.2); }
+              .btn-allure-rep { background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); color: #34d399; }
+              .btn-allure-rep:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(52, 211, 153, 0.3); filter: brightness(1.2); }
+              footer { margin-top: auto; padding-top: 40px; color: var(--text-muted); font-size: 0.85rem; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <header>
+                <h1>🎭 Playwright Automation Portal</h1>
+                <div class="timestamp"><i class="fa-regular fa-clock"></i> Last Execution: <span id="live-date">Loading...</span></div>
+              </header>
+
+              <div class="meta-card">
+                <div class="meta-item">
+                  <div class="meta-icon"><i class="fa-solid fa-server"></i></div>
+                  <div class="meta-content">
+                    <label>Target Environment</label>
+                    <span id="live-env" class="badge">LOADING...</span>
+                  </div>
+                </div>
+                <div class="meta-item">
+                  <div class="meta-icon"><i class="fa-solid fa-globe"></i></div>
+                  <div class="meta-content">
+                    <label>Execution Browser</label>
+                    <span id="live-browser">Loading...</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="report-card">
+                <h3><i class="fa-solid fa-square-poll-vertical"></i> Test Artifacts & Analytical Logs</h3>
+                <div class="report-actions">
+                  <a href="./__ENV_FOLDER__/playwright-report/index.html" class="btn-report btn-pw">
+                    <i class="fa-solid fa-mask"></i><span>Playwright Core</span>
+                  </a>
+                  <a href="./__ENV_FOLDER__/playwright-html-report/index.html" class="btn-report btn-html-rep">
+                    <i class="fa-solid fa-code"></i><span>HTML Reporter</span>
+                  </a>
+                  <a href="./__ENV_FOLDER__/allure-report/index.html" class="btn-report btn-allure-rep">
+                    <i class="fa-solid fa-chart-line"></i><span>Allure Insights</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <footer>Powered by Playwright Framework & GitHub Pages</footer>
+
+            <script>
+              const pipelineEnv = "__ENV__";
+              const pipelineBrowser = "__BROWSER__";
+
+              const finalEnv = pipelineEnv.startsWith("__") ? "qa" : pipelineEnv;
+              const finalBrowser = pipelineBrowser.startsWith("__") ? "Google Chrome" : pipelineBrowser;
+
+              const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
+              const formattedDate = new Date().toLocaleString('en-US', options) + ' UTC';
+
+              document.getElementById("live-date").textContent = formattedDate;
+              document.getElementById("live-browser").textContent = finalBrowser;
+              
+              const envBadge = document.getElementById("live-env");
+              envBadge.textContent = finalEnv.toUpperCase();
+              envBadge.classList.add("env-" + finalEnv.toLowerCase());
+            </script>
+          </body>
+          </html>
+          EOF
+
+          # 🟢 Sed Token Replacement executed cleanly on compiled path
+          sed -i "s/__ENV__/${ENV}/g" gh-pages-deploy/index.html
+          sed -i "s/__ENV_FOLDER__/${ENV}/g" gh-pages-deploy/index.html
+          sed -i "s/__BROWSER__/${BROWSER}/g" gh-pages-deploy/index.html
+
+      # ========== Deploy to GitHub Pages ==========
+      - name: 🌐 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: gh-pages-deploy
+          keep_files: true # ✅ Ensures multi-env dashboards do not wipe out each other
+
+      # ========== Print Consolidated URL Logs ==========
+      - name: 🔗 Report URLs Log
+        run: |
+          ENV="${{ github.event.inputs.environment }}"
+          BROWSER="${{ github.event.inputs.browser }}"
+          echo "=========================================================================="
+          echo "📊 SUCCESS: TESTING PORTAL COMPILED AND PUBLISHED!"
+          echo "=========================================================================="
+          echo "🔹 Active Domain Target: $ENV"
+          echo "🔹 Active Device Engine: $BROWSER"
+          echo ""
+          echo "🏠 Live Main Dashboard Hub:"
+          echo "   https://vinay-sky182.github.io/orangehrm-playwright-ts/"
+          echo ""
+          echo "📊 Dedicated Execution Reports ($ENV):"
+          echo "   Core Playwright:  https://vinay-sky182.github.io/orangehrm-playwright-ts/$ENV/playwright-report/index.html"
+          echo "   HTML Spec Sheet:  https://vinay-sky182.github.io/orangehrm-playwright-ts/$ENV/playwright-html-report/index.html"
+          echo "   Allure Analytics: https://vinay-sky182.github.io/orangehrm-playwright-ts/$ENV/allure-report/index.html"
+          echo "=========================================================================="

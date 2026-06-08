@@ -10,7 +10,7 @@
 
 # ============================================
 
-name: Playwright Manual Run
+name: playwright manual run
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ on:
           - "Safari"
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "18"
 
 jobs:
   test:
@@ -329,12 +329,13 @@ jobs:
               const finalEnv = pipelineEnv.startsWith("__") ? "qa" : pipelineEnv;
               const finalBrowser = pipelineBrowser.startsWith("__") ? "Google Chrome" : pipelineBrowser;
 
-              const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
-              const formattedDate = new Date().toLocaleString('en-US', options) + ' UTC';
+              // Exact Indian Standard Time Clock Logic
+              const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Kolkata', hour12: false };
+              const formattedDate = new Date().toLocaleString('en-IN', options) + ' IST';
 
               document.getElementById("live-date").textContent = formattedDate;
               document.getElementById("live-browser").textContent = finalBrowser;
-              
+
               const envBadge = document.getElementById("live-env");
               envBadge.textContent = finalEnv.toUpperCase();
               envBadge.classList.add("env-" + finalEnv.toLowerCase());
@@ -372,7 +373,7 @@ jobs:
           echo "   https://vinay-sky182.github.io/orangehrm-playwright-ts/"
           echo ""
           echo "📊 Dedicated Execution Reports ($ENV):"
-          echo "   Core Playwright:  https://vinay-sky182.github.io/orangehrm-playwright-ts/$ENV/playwright-report/index.html"
-          echo "   HTML Spec Sheet:  https://vinay-sky182.github.io/orangehrm-playwright-ts/$ENV/playwright-html-report/index.html"
+          echo "   Playwright Built-in:  https://vinay-sky182.github.io/orangehrm-playwright-ts/$ENV/playwright-report/index.html"
+          echo "   Playwright HTML Reporter:  https://vinay-sky182.github.io/orangehrm-playwright-ts/$ENV/playwright-html-report/index.html"
           echo "   Allure Analytics: https://vinay-sky182.github.io/orangehrm-playwright-ts/$ENV/allure-report/index.html"
           echo "=========================================================================="

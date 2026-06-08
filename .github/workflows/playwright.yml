@@ -16,16 +16,17 @@ on:
         options:
           - qa
           - dev
+
       browser:
-        description: 'Select Target Browser'
+        description: "Select Target Browser"
         required: true
-        default: 'Google Chrome'
+        default: "Google Chrome"
         type: choice
         options:
-          - 'Google Chrome'
-          - 'Microsoft Edge'
-          - 'Firefox'
-          - 'Safari'
+          - "Google Chrome"
+          - "Microsoft Edge"
+          - "Firefox"
+          - "Safari"
 
 jobs:
   test:
@@ -46,7 +47,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Install Playwright Browsers (all configured browsers)
+      # 4️⃣ Install Playwright Browsers (all configured browsers - Only Once)
       - name: Install Playwright Browsers
         run: npx playwright install chromium chrome msedge firefox webkit --with-deps
 
@@ -56,18 +57,17 @@ jobs:
           echo "${{ secrets.QA_ENV_FILE }}" > .env.qa
           echo "${{ secrets.DEV_ENV_FILE }}" > .env.dev
 
-      # 5️⃣ Run Playwright Tests (headed in virtual display)
-      - name: Run Playwright Tests (headed in virtual display)
+      # 5️⃣ Run Playwright Tests (Clean & Headless for CI)
+      - name: Run Playwright Tests
         env:
           # 🧠 SMART TOGGLE: Dropdown se select kiya toh input uthaega, warna push/PR par automatic 'qa' chalega
           ENV: ${{ github.event.inputs.environment || 'qa' }}
+          # Force Playwright config to run in headless mode on GitHub Actions
+          CI: true
+          PLAYWRIGHT_HEADLESS: "true"
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y xvfb
-          # Ensure Playwright browsers are installed (safe to run again)
-          npx playwright install chromium chrome msedge firefox webkit --with-deps
-          # Run tests in headed mode on a virtual display
-          xvfb-run -s "-screen 0 1920x1080x24" npx playwright test tests/loginTest.spec.ts --config=playwright.config.ts --project="${{ github.event.inputs.browser || 'Google Chrome' }}" --headed
+          # 🚀 Running cleanly in background without virtual display glitches
+          npx playwright test tests/loginTest.spec.ts --config=playwright.config.ts --project="${{ github.event.inputs.browser || 'Google Chrome' }}"
 
       # 6️⃣ Generate Allure HTML Report
       - name: Generate Allure Report
@@ -169,7 +169,7 @@ jobs:
           echo "Combined reports directory contents:"
           ls -R gh-pages-deploy
 
-      # 5️⃣ Publish reports to GitHub Pages
+      # 6️⃣ Publish reports to GitHub Pages
       - name: Publish Reports to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -178,7 +178,7 @@ jobs:
           publish_dir: gh-pages-deploy
           force_orphan: true
 
-      # 6️⃣ Print final URLs
+      # 7️⃣ Print final URLs
       - name: Report URLs
         run: |
           echo "Reports Published!"

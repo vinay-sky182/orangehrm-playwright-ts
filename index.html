@@ -103,13 +103,13 @@
     <div class="report-card">
       <h3><i class="fa-solid fa-square-poll-vertical"></i> Test Artifacts & Analytical Logs</h3>
       <div class="report-actions">
-        <a href="./dev/playwright-report/index.html" class="btn-report btn-pw">
+        <a href="./qa/playwright-report/index.html" class="btn-report btn-pw">
           <i class="fa-solid fa-mask"></i><span>Playwright Core</span>
         </a>
-        <a href="./dev/playwright-html-report/index.html" class="btn-report btn-html-rep">
+        <a href="./qa/playwright-html-report/index.html" class="btn-report btn-html-rep">
           <i class="fa-solid fa-code"></i><span>HTML Reporter</span>
         </a>
-        <a href="./dev/allure-report/index.html" class="btn-report btn-allure-rep">
+        <a href="./qa/allure-report/index.html" class="btn-report btn-allure-rep">
           <i class="fa-solid fa-chart-line"></i><span>Allure Insights</span>
         </a>
       </div>
@@ -118,7 +118,7 @@
   <footer>Powered by Playwright Framework & GitHub Pages</footer>
 
   <script>
-    const pipelineEnv = "dev";
+    const pipelineEnv = "qa";
     const pipelineBrowser = "Google Chrome";
 
     const finalEnv = pipelineEnv.startsWith("__") ? "qa" : pipelineEnv;

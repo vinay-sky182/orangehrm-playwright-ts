@@ -1,0 +1,5 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Sun Jun 28 12:11:08 UTC 2026","Sun Jun 28 12:11:12 UTC 2026","4751","Google Chrome","loginTest.spec.ts","","","","user login with valid credentials",""
+"passed","Sun Jun 28 12:10:58 UTC 2026","Sun Jun 28 12:11:07 UTC 2026","9546","Google Chrome","addEmployee.spec.ts","","","","test add employee without login credentials setup",""
+"broken","Sun Jun 28 12:10:25 UTC 2026","Sun Jun 28 12:10:57 UTC 2026","31254","Google Chrome","addEmployee.spec.ts","","","","test add employee with login credentials setup",""
+"passed","Sun Jun 28 12:11:12 UTC 2026","Sun Jun 28 12:11:16 UTC 2026","3556","Google Chrome","loginTest.spec.ts","","","","user login with invalid credentials",""
